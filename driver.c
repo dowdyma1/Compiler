@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include "lex_analyzer.h"
+#include "parser.h"
+#include "codegen.h"
+#include "vm.h"
+
+
+int main(int argc, char *argv[]){
+    
+    if(argc < 2){
+        printf("Please include the file name.\n");
+    }
+
+    bool aFlag = false, vFlag = false, lFlag = false;
+
+    if(argc == 5){
+        aFlag = true;
+        vFlag = true;
+        lFlag = true;
+    }
+    else if(argc != 2){
+        if(argv[2][1] == 'v'){
+            vFlag = true;
+        }
+        else if(argv[2][1] == 'a'){
+            aFlag = true;
+        }
+        else{
+            lFlag = true;
+        }
+
+        if(argc == 4){
+            if(argv[3][1] == 'v'){
+                vFlag = true;
+            }
+            else if(argv[3][1] == 'a'){
+                aFlag = true;
+            }
+            else{
+                lFlag = true;
+            }
+        }
+    }
+
+
+    struct entry *list = doLex(argv[1], lFlag); // from lex_analyzer.c
+
+    int toQuit = isStop();
+
+    if(toQuit){return 0;}
+
+    symbol * table = parse(list);
+    int size = tableSize();
+    int toHalt = isHalt();
+
+    if(toHalt){return 0;}
+
+    printf("No errors, program is syntactically correct.\n");
+
+    instruction *code = generate_code(table, list, &size);
+
+    int codeSize = getCodeSize();
+
+    virtual_machine(code, codeSize, aFlag, vFlag);
+
+    free(list);
+    free(table);
+    free(code);
+
+
+    return 0;
+}
