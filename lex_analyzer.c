@@ -21,6 +21,7 @@ int checkReserved(char cache[10]);
 void printLexemeList(struct entry* cur);
 struct entry* doLex(char *filename, bool lflag);
 int isStop();
+void printSymRep(struct entry* cur);
 
 int isStop(){
     return toStop;
@@ -72,17 +73,23 @@ struct entry* doLex(char *filename, bool lflag){
             // chunk of characters has an alpha in front
             if(isalpha(c)){
                 // add to cache
-                strncat(cache, &c, 1);
+                char y = (char) c;
+                const char *x = &y;
+                strncat(cache, x, 1);
                 c = fgetc(ifp); // increment character from file stream
                 
                 // as long as we have an alpha or digit, keep adding to cache
                 while(isalpha(c) || isdigit(c)){
-                    strncat(cache, &c, 1);
+                    char y = (char) c;
+                    const char *x = &y;
+                    strncat(cache, x, 1);
 
                     // if we're over the identifier character limit
                     if(strlen(cache) > 10){
                         while(isalpha(c) || isdigit(c)){ // keep adding chars to cache
-                            strncat(cache, &c, 1);
+                            char y = (char) c;
+                            const char *x = &y;
+                            strncat(cache, x, 1);
                             c = fgetc(ifp);
                         }
                         printf("Error, identifier too long: %s\n", cache);
@@ -110,12 +117,16 @@ struct entry* doLex(char *filename, bool lflag){
             else if(isdigit(c)){
                 int isError = 0;
                 while(isdigit(c)){
-                    strncat(cache, &c, 1);
+                    char y = (char) c;
+                    const char *x = &y;
+                    strncat(cache, x, 1);
 
                     // if cache bigger than 5
                     if(strlen(cache) > 5){
                         while(isdigit(c)){
-                            strncat(cache, &c, 1);
+                            char y = (char) c;
+                            const char *x = &y;
+                            strncat(cache, x, 1);
                             c = fgetc(ifp);
                         }
                         printf("error, number too big: %s\n", cache);
@@ -132,7 +143,9 @@ struct entry* doLex(char *filename, bool lflag){
                     if(isalpha(c)){
                         isError = 1;
                         while(isalpha(c)){
-                            strncat(cache, &c, 1);
+                            char y = (char) c;
+                            const char *x = &y;
+                            strncat(cache, x, 1);
                             c = fgetc(ifp);
                         }
                         printf("error, invalid identifier: %s\n", cache);
@@ -189,16 +202,22 @@ struct entry* doLex(char *filename, bool lflag){
 
             // two character tokens
             else if(c == '<'){
-                strncat(cache, &c, 1);
+                char y = (char) c;
+                const char *x = &y;
+                strncat(cache, x, 1);
                 ch[0] = c;
                 c = fgetc(ifp);
                 if(c == '>'){
-                    strncat(cache, &c, 1);
+                    char y = (char) c;
+                    const char *x = &y;
+                    strncat(cache, x, 1);
                     curEntry = toTable(cache, neqsym, curEntry);
                     c = fgetc(ifp);
                 }
                 else if(c == '='){
-                    strncat(cache, &c, 1);
+                    char y = (char) c;
+                    const char *x = &y;
+                    strncat(cache, x, 1);
                     curEntry = toTable(cache, leqsym, curEntry);
                     c = fgetc(ifp);
                 }
@@ -210,11 +229,15 @@ struct entry* doLex(char *filename, bool lflag){
 
             // more two character tokens
             else if(c == '>'){
-                strncat(cache, &c, 1);
+                char y = (char) c;
+                const char *x = &y;
+                strncat(cache, x, 1);
                 ch[0] = c;
                 c = fgetc(ifp);
                 if(c == '='){
-                    strncat(cache, &c, 1);
+                    char y = (char) c;
+                    const char *x = &y;
+                    strncat(cache, x, 1);
                     curEntry = toTable(cache, geqsym, curEntry);
                     c = fgetc(ifp);
                 }
@@ -226,10 +249,14 @@ struct entry* doLex(char *filename, bool lflag){
 
             // :=
             else if(c == ':'){
-                strncat(cache, &c, 1);
+                char y = (char) c;
+                const char *x = &y;
+                strncat(cache, x, 1);
                 c = fgetc(ifp);
                 if(c == '='){
-                    strncat(cache, &c, 1);
+                    char y = (char) c;
+                    const char *x = &y;
+                    strncat(cache, x, 1);
                     curEntry = toTable(cache, becomessym, curEntry);
                     c = fgetc(ifp);
                 }

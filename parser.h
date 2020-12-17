@@ -16,8 +16,6 @@ extern "C" {
         bool isMarked;
     }symbol;
 
-    symbol* parse(struct entry *list);
-
 #ifdef __cplusplus
 }
 #endif

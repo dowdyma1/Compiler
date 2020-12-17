@@ -6,6 +6,16 @@
 #include "codegen.h"
 #include "vm.h"
 
+struct entry* doLex(char *filename, bool lflag);
+int isStop();
+symbol * parse(struct entry *list);
+int tableSize();
+int isHalt();
+instruction *generate_code(symbol *table, struct entry *list, int *tableSize);
+int getCodeSize();
+void virtual_machine(instruction *code, int size, bool aflag, bool vflag);
+
+
 
 int main(int argc, char *argv[]){
     

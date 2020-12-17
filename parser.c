@@ -26,6 +26,8 @@ void expression(int lexlevel);
 void term(int lexlevel);
 void factor(int lexlevel);
 int isHalt();
+int tableSize();
+symbol * parse(struct entry *list);
 
 char tokenName[10];
 int tp = 0;
@@ -452,7 +454,7 @@ void statement(int lexlevel){
 }
 
 
-void condition(lexlevel){
+void condition(int lexlevel){
     if(isError){
         return;
     }

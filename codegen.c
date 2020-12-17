@@ -19,8 +19,6 @@ void gTerm(int reg, int lexlevel);
 void gFactor(int reg, int lexlevel);
 char* opcode_to_str(int opcode);
 int getCodeSize();
-
-
 instruction *generate_code(symbol *table, struct entry *list, int *tableSize);
 
 int funcCounter = 0;

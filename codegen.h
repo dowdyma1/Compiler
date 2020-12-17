@@ -15,8 +15,6 @@ extern "C" {
         int m;
     }instruction;
 
-    instruction *generate_code(symbol *table, struct entry *list, int *tableSize);
-
 #ifdef __cplusplus
 }
 #endif
