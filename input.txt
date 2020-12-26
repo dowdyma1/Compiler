@@ -7,7 +7,7 @@ procedure a;
 	  var y,z;
       begin
         z:=1;
-        x:=y+z+w
+        x:=y+z+w;
       end;
     begin
       y:=x+u+w;

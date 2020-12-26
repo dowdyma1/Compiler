@@ -7,8 +7,10 @@
 #include "lex_analyzer.h"
 #include "codegen.h"
 #define CODE_SIZE 1000
+#define PRINTOUT_CODE 0
+#define PRINTOUT_SYM_TABLE 0
 
-void emit(int op, int r, int l, int m);
+void emit(int op, int r, int l, int m, char const *func);
 void gErrorFn(int num);
 void gProgram();
 void gBlock(int lexlevel, char procName[10]);
@@ -152,7 +154,7 @@ void printCode(){
 }
 
 
-void emit (int op, int r, int l, int m){
+void emit (int op, int r, int l, int m, char const* func){
     if(cx > CODE_SIZE){
         // too many codes
         gErrorFn(1);
@@ -164,7 +166,39 @@ void emit (int op, int r, int l, int m){
         code[cx].m = m;
         cx++;
     }
+
+    if(cx < 60){
+        if(PRINTOUT_CODE){
+            printf("current function: ");
+
+            for(int i = 1; func[i] != '\0'; i++){
+                printf("%c", func[i]);
+            }
+
+            printf("    current token: %s", gTokenName);
+
+            printf("\n");
+
+            printf("\tAssembly Instructions\n");
+            printCode();
+
+            for(int i = 0; i < 50; i++){
+                printf("\n");
+            }
+        }
+
+        if(PRINTOUT_SYM_TABLE){
+            printf("current token: %s\n\n", gTokenName);
+            printf("\t\tSymbol Table");
+            gPrintSymbolTable();
+
+            for(int i = 0; i < 50; i++){
+                printf("\n");
+            }
+        }
+    }
 }
+
 
 void gErrorFn(int num){
     printf("ERROR %d\n", num);
@@ -177,7 +211,7 @@ void gProgram(){
         if(gSymbol_table[i].kind == 3){
             gSymbol_table[i].val = count;
             count++;
-            emit(7, 0, 0, 0); // JMP
+            emit(7, 0, 0, 0, __func__); // JMP
         }
     }
 
@@ -211,7 +245,7 @@ void gProgram(){
         }    
     }
 
-    emit(9, 0, 0, 3); // HALT
+    emit(9, 0, 0, 3, __func__); // HALT
 }
 
 void gBlock(int lexlevel, char procName[10]){
@@ -264,7 +298,7 @@ void gBlock(int lexlevel, char procName[10]){
 
             gGetToken(2);
             gBlock(lexlevel + 1, tempName);
-            emit(2, 0, 0, 0); // RTN
+            emit(2, 0, 0, 0, __func__); // RTN
             gGetToken(1);
         }while(gToken == procsym);
     }
@@ -281,7 +315,7 @@ void gBlock(int lexlevel, char procName[10]){
     // ^update sym table for this procedure (cur procedure) M = current code index
     gSymbol_table[procInd].addr = cx;
 
-    emit(6, 0, 0, 3 + gNumVars); // INC
+    emit(6, 0, 0, 3 + gNumVars, __func__); // INC
 
     gStatement(lexlevel);
 
@@ -314,7 +348,7 @@ void gStatement(int lexlevel){
         gExpression(0, lexlevel);
 
         emit(4, 0, lexlevel - gSymbol_table[fixIndex].level,
-                gSymbol_table[fixIndex].addr); // STO
+                gSymbol_table[fixIndex].addr, __func__); // STO
 
     }
     if(gToken == callsym){
@@ -327,7 +361,7 @@ void gStatement(int lexlevel){
         procIndex = gCheckTablev3(gTokenName, lexlevel);
 
         emit(5, 0, lexlevel - gSymbol_table[procIndex].level,
-                gSymbol_table[procIndex].addr); // CAL
+                gSymbol_table[procIndex].addr, __func__); // CAL
 
         gGetToken(1);
     }
@@ -346,14 +380,14 @@ void gStatement(int lexlevel){
         gGetToken(1);
         gCondition(lexlevel);
         ctemp = cx;
-        emit(8, 0, 0, 0); // JPC
+        emit(8, 0, 0, 0, __func__); // JPC
         gGetToken(1);
         gStatement(lexlevel);
 
         if(gToken == elsesym){
             gGetToken(1);
             ctemp2 = cx; // for jmp
-            emit(7, 0, 0, 0); // JMP
+            emit(7, 0, 0, 0, __func__); // JMP
             
             code[ctemp].m = cx;
 
@@ -374,11 +408,11 @@ void gStatement(int lexlevel){
         
         ctemp2 = cx; // for jump
 
-        emit(8, 0, 0, 0); // JPC
+        emit(8, 0, 0, 0, __func__); // JPC
 
         gStatement(lexlevel);
 
-        emit(7, 0, 0, ctemp); // JMP
+        emit(7, 0, 0, ctemp, __func__); // JMP
 
         code[ctemp2].m = cx; // fixing JPC
     }
@@ -392,15 +426,15 @@ void gStatement(int lexlevel){
 
         gGetToken(1);
         
-        emit(9, 0, 0, 2); // READ
+        emit(9, 0, 0, 2, __func__); // READ
         emit(4, 0, lexlevel - gSymbol_table[tLoc].level, 
-                gSymbol_table[tLoc].addr); //STO
+                gSymbol_table[tLoc].addr, __func__); //STO
     }
 
     if(gToken == writesym){
         gGetToken(1);
         gExpression(0, lexlevel);
-        emit(9, 0, 0, 1); // WRITE
+        emit(9, 0, 0, 1, __func__); // WRITE
 
     }
 }
@@ -409,44 +443,44 @@ void gCondition(int lexlevel){
     if(gToken == oddsym){
         gGetToken(1);
         gExpression(0, lexlevel);
-        emit(15, 0, 0, 0); // ODD
+        emit(15, 0, 0, 0, __func__); // ODD
     }
     else{
         gExpression(0,lexlevel);
         if(gToken == eqsym){
             gGetToken(1);
             gExpression(1, lexlevel);
-            emit(17, 0, 0, 1);
+            emit(17, 0, 0, 1, __func__);
         }
 
         if(gToken == neqsym){
             gGetToken(1);
             gExpression(1, lexlevel);
-            emit(18, 0, 0, 1); // NEQ
+            emit(18, 0, 0, 1, __func__); // NEQ
         }
 
         if(gToken == lessym){
            gGetToken(1); 
            gExpression(1, lexlevel);
-           emit(19, 0 , 0, 1); // LSS
+           emit(19, 0 , 0, 1, __func__); // LSS
         }
 
         if(gToken == leqsym){
             gGetToken(1);
             gExpression(1, lexlevel);
-            emit(20, 0, 0, 1); // LEQ
+            emit(20, 0, 0, 1, __func__); // LEQ
         }
 
         if(gToken == gtrsym){
             gGetToken(1);
             gExpression(1, lexlevel);
-            emit(21, 0, 0, 1); //GTR
+            emit(21, 0, 0, 1, __func__); //GTR
         }
 
         if(gToken == geqsym){
             gGetToken(1);
             gExpression(1, lexlevel);
-            emit(22, 0, 0, 1); //GEQ
+            emit(22, 0, 0, 1, __func__); //GEQ
         }
     }
 }
@@ -459,18 +493,18 @@ void gExpression(int reg, int lexlevel){
     if(gToken == minussym){
         gGetToken(1);
         gTerm(reg, lexlevel);
-        emit(10, reg, 0, 0); // NEG
+        emit(10, reg, 0, 0, __func__); // NEG
 
         while(gToken == plussym || gToken == minussym){
             if(gToken == plussym){
                 gGetToken(1);
                 gTerm(reg+1, lexlevel);
-                emit(11, reg, reg, reg+1); // ADD
+                emit(11, reg, reg, reg+1, __func__); // ADD
             }
             if(gToken == minussym){
                 gGetToken(1);
                 gTerm(reg+1, lexlevel);
-                emit(12, reg, reg, reg+1); // SUB
+                emit(12, reg, reg, reg+1, __func__); // SUB
             }
         }
     }
@@ -481,12 +515,12 @@ void gExpression(int reg, int lexlevel){
         if(gToken == plussym){
             gGetToken(1);
             gTerm(reg+1, lexlevel);
-            emit(11, reg, reg, reg+1); // ADD
+            emit(11, reg, reg, reg+1, __func__); // ADD
         }
         if(gToken == minussym){
             gGetToken(1);
             gTerm(reg+1, lexlevel);
-            emit(12, reg, reg, reg+1); // SUB
+            emit(12, reg, reg, reg+1, __func__); // SUB
         }
     }
 }
@@ -498,12 +532,12 @@ void gTerm(int reg, int lexlevel){
         if(gToken == multsym){
             gGetToken(1);
             gFactor(reg+1, lexlevel);
-            emit(13, reg, reg, reg+1); // MUL
+            emit(13, reg, reg, reg+1, __func__); // MUL
         }
         if(gToken == slashsym){
             gGetToken(1);
             gFactor(reg+1, lexlevel);
-            emit(14, reg, reg, reg+1); // DIV
+            emit(14, reg, reg, reg+1, __func__); // DIV
         }
     }
 }
@@ -519,17 +553,17 @@ void gFactor(int reg, int lexlevel){
         symbol curSym = gSymbol_table[symIndex];
         if(curSym.kind == 1){
             // ^emit LIT (1, regtoendupin, 0, value from the symbol table)
-            emit(1, reg, 0, curSym.val); // LIT
+            emit(1, reg, 0, curSym.val, __func__); // LIT
         }
 
         if(curSym.kind == 2){
             // ^emit LOD (3, regtoendupin, L = lexlevel - L from the symbol table, m from the symbol table)
-            emit(3, reg, lexlevel - curSym.level, curSym.addr); // LOD
+            emit(3, reg, lexlevel - curSym.level, curSym.addr, __func__); // LOD
         }
         gGetToken(1);
     }
     else if(gToken == numbersym){
-        emit(1, reg, 0, atoi(gTokenName)); // LIT
+        emit(1, reg, 0, atoi(gTokenName), __func__); // LIT
         gGetToken(1);
     }
     else if(gToken == semicolonsym){

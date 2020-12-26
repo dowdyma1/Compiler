@@ -10,11 +10,14 @@
 #include "lex_analyzer.h"
 #include "parser.h"
 
+#define PRINT_SYM_TABLE 0
+
 
 void setHead(struct entry *list);
 void getToken();
 void addSymbol(int kind, char name[10], int level, int val, int addr, bool isMarked);
 int checkTable(char name[10]);
+void printSymbolTable();
 void program();
 void block(int lexlevel);
 int const_declaration(int lexlevel);
@@ -185,6 +188,13 @@ void addSymbol(int kind, char name[10], int level, int val, int addr, bool isMar
     symbol_table[tp].isMarked = isMarked;
 
     tp++;
+
+    if(PRINT_SYM_TABLE){
+        printf("current Token: %s\n\n", tokenName);
+        printf("\t\tSymbol Table");
+        printSymbolTable();
+        for(int i = 0; i < 20; i++){printf("\n");}
+    }
 }
 
 // gets the position of the desired row in the table

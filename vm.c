@@ -14,6 +14,9 @@
 #define MAX_STACK_HEIGHT 1000
 #define MAX_CODE_LENGTH 500
 
+#define PRINTOUT_STACK 0
+#define LINES_PER_PRINTOUT 10
+
 int arLens[MAX_CODE_LENGTH];
 int arCount = 0;
 
@@ -144,7 +147,7 @@ void virtual_machine(instruction *code, int size, bool aflag, bool vflag){
     ir.m = 0;
 
     
-    if(vflag){
+    if(vflag || PRINTOUT_STACK){
         // PRINTING INITIAL VALUES
         printf("\t\t\t\t\tpc\tbp\tsp\n");
         printf("\t\t\t\t\t%d\t%d\t%d\n",pc,bp,sp);
@@ -152,6 +155,12 @@ void virtual_machine(instruction *code, int size, bool aflag, bool vflag){
         print_arr(rf,8);
         printf("\nStack: ");
         printf("\n");
+    }
+
+    if(PRINTOUT_STACK){
+        for(int i = 0; i < LINES_PER_PRINTOUT; i++){
+            printf("\n");
+        }
     }
 
     // main code loop
@@ -206,7 +215,7 @@ void virtual_machine(instruction *code, int size, bool aflag, bool vflag){
                 if(rf[ir.r] == 0){pc = ir.m;}
                 break;
             case 9:
-                if(ir.m == 1){
+                if(ir.m == 1 && vflag){
                     printf("\nRegister %d: %d\n",ir.r, rf[ir.r]);
                 }
                 if(ir.m == 2){
@@ -287,7 +296,7 @@ void virtual_machine(instruction *code, int size, bool aflag, bool vflag){
 
         }
         
-        if(vflag){
+        if(vflag || PRINTOUT_STACK){
             // PRINTING
             printf("\n");
             printf("\t\t\t\t\tpc\tbp\tsp\n");
@@ -299,6 +308,12 @@ void virtual_machine(instruction *code, int size, bool aflag, bool vflag){
             printf("\nStack: ");
             print_stack(stack);
             printf("\n");
+        }
+
+        if(PRINTOUT_STACK){
+            for(int i = 0; i < LINES_PER_PRINTOUT; i++){
+                printf("\n");
+            }
         }
 
     }

@@ -19,9 +19,13 @@ void virtual_machine(instruction *code, int size, bool aflag, bool vflag);
 
 int main(int argc, char *argv[]){
     
-    if(argc < 2){
+    /*
+    if(argv[2][0] == 'v' || argv[2][0] == 'a' || argv[2][0] == 'l' ||
+            argv[2][0] == '\0'){
         printf("Please include the file name.\n");
+        return 1;
     }
+    */
 
     bool aFlag = false, vFlag = false, lFlag = false;
 
