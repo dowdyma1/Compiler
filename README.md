@@ -46,6 +46,7 @@ Here is the output from running:
 ./prog input.txt -a -v -l
 ```
 
+```
 Source Program:
 var x,y,z,v,w;
 procedure a;
@@ -503,3 +504,4 @@ Stack: 0 0 0 9 2 2 4 5
 Registers: 6 5 0 0 0 0 0 0
 Stack: 0 0 0 9 2 2 4 5 
 
+```
